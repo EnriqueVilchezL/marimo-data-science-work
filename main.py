@@ -548,13 +548,6 @@ def _():
 
 
 @app.cell
-def _():
-    import scipy.stats as stats
-
-    return
-
-
-@app.cell
 async def _():
     import sys
 
@@ -562,6 +555,13 @@ async def _():
         import micropip
         await micropip.install("scikit-learn")
         await micropip.install("scipy")
+    return
+
+
+@app.cell
+def _():
+    import scipy.stats as stats
+
     return
 
 
