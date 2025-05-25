@@ -16,7 +16,14 @@ def _(mo):
         """
     ##1. Dataset
 
-    <span style="color:red">LLENAR CON INTRODIUCCION AL DATASET</span>
+    This dataset contains profile data collected from VK.com (VKontakte), Russia's largest social network, for distinguishing between genuine users and automated bots. The data includes both numerical and categorical features extracted from user profiles.
+
+    Data Collection:
+    Collected from public VK.com profiles.
+    Includes both verified human users and verified bot accounts.
+    Represents realistic social network conditions with incomplete profiles.
+
+    Source: https://www.kaggle.com/datasets/juice0lover/users-vs-bots-classification
     """
     )
     return
@@ -153,42 +160,6 @@ def _(sql_with_marimo):
 def _(mo):
     mo.md(
         r"""
-    ## Univariable analysis
-
-    To do univariable analysis, we are going to use **Altair** to demonstrate its capabilities
-    """
-    )
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(
-        r"""
-    ### Cleaning the data
-
-    <span style="color:red">LLENAR CON INTRODUCCION</span>
-    """
-    )
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(
-        r"""
-    ## Multivariable analysis
-
-    Now we are going to do some multivariable analysis with **Marimo** and **Altair**. Some common graphics are created with **Altair**, such as **heatmaps** and **bar plots** and interactivity is added with **Marimo**.
-    """
-    )
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(
-        r"""
     ### Cleaning the data
 
     The first thing we gotta do is clean the data. That means removing null values or replacing them with a value such as the median. In **Marimo** we can use the **Polars** or **Pandas** library to clean those values. Here, we are going to use **Polars**.
@@ -227,9 +198,9 @@ def _(mo):
 
 @app.cell
 def _(bot_dataset, non_useful_columns):
-    multivariable_analysis_dataset = bot_dataset.drop(non_useful_columns)
-    multivariable_analysis_dataset.describe()
-    return (multivariable_analysis_dataset,)
+    analysis_dataset = bot_dataset.drop(non_useful_columns)
+    analysis_dataset.describe()
+    return (analysis_dataset,)
 
 
 @app.cell
@@ -239,11 +210,47 @@ def _(mo):
 
 
 @app.cell
-def _(multivariable_analysis_dataset, pl):
-    mv_df = multivariable_analysis_dataset.select(
-        [pl.col(c).fill_null(pl.col(c).median()) for c in multivariable_analysis_dataset.columns]
+def _(analysis_dataset, pl):
+    mv_df = analysis_dataset.select(
+        [pl.col(c).fill_null(pl.col(c).median()) for c in analysis_dataset.columns]
     )
     return (mv_df,)
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    ## Univariable analysis
+
+    To do univariable analysis, we are going to use **Altair** to demonstrate its capabilities
+    """
+    )
+    return
+
+
+app._unparsable_cell(
+    r"""
+    ### Variables
+
+    The first step, is to select the variables to analyze.
+
+
+    """,
+    name="_"
+)
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    ## Multivariable analysis
+
+    Now we are going to do some multivariable analysis with **Marimo** and **Altair**. Some common graphics are created with **Altair**, such as **heatmaps** and **bar plots** and interactivity is added with **Marimo**.
+    """
+    )
+    return
 
 
 @app.cell
