@@ -561,6 +561,7 @@ async def _():
     if sys.platform == "emscripten":
         import micropip
         await micropip.install("scikit-learn")
+        await micropip.install("scipy")
     return
 
 
