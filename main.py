@@ -555,9 +555,18 @@ def _():
 
 
 @app.cell
+async def _():
+    import sys
+
+    if sys.platform == "emscripten":
+        import micropip
+        await micropip.install("scikit-learn")
+    return
+
+
+@app.cell
 def _():
     from sklearn.metrics import matthews_corrcoef
-
     return (matthews_corrcoef,)
 
 
