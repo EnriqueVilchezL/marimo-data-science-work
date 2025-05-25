@@ -16,7 +16,11 @@ def _(mo):
         """
     ##1. Dataset
 
-    <span style="color:red">LLENAR CON INTRODIUCCION AL DATASET</span>
+    To demonstrate the capabilities of Marimo and Altair, an exercise is proposed using a dataset containing information about users and bots from the Russian social network vk.com. This dataset can be found on [Kaggle](https://www.kaggle.com/datasets/juice0lover/users-vs-bots-classification).
+
+    The dataset is used as an exercise to determine whether a user is a bot or a real person. Nowadays, this is a growing challenge for companies, as the creation of bot farms is becoming more common. These bots are used to generate spam or, even worse, to carry out denial-of-service attacks. In addition to this focus, the dataset can also be used for other related analyses.
+
+    The dataset contains a total of 5,874 entries and 60 columns or features. It is balanced with a 50-50 split between real user entries and bot entries. All accounts marked as real users were verified, as were all accounts marked as bots. The feature types vary and include numerical attributes, categorical attributes, binary attributes, and strings.   
     """
     )
     return
