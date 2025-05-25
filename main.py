@@ -162,7 +162,7 @@ def _(mo):
         r"""
     ### Cleaning the data
 
-    The first thing we gotta do is clean the data. That means removing null values or replacing them with a value such as the median. In **Marimo** we can use the **Polars** or **Pandas** library to clean those values. Here, we are going to use **Polars**.
+    The first thing we have to do is to clean the data. That means removing null values or replacing them with a value such as the median. In **Marimo** we can use the **Polars** or **Pandas** library to clean those values. Here, we are going to use **Polars**.
     """
     )
     return
@@ -211,10 +211,12 @@ def _(mo):
 
 @app.cell
 def _(analysis_dataset, pl):
-    mv_df = analysis_dataset.select(
+    clean_df = analysis_dataset.select(
         [pl.col(c).fill_null(pl.col(c).median()) for c in analysis_dataset.columns]
     )
-    return (mv_df,)
+    # Convert
+    pd_clean_df = clean_df.to_pandas()
+    return clean_df, pd_clean_df
 
 
 @app.cell
@@ -229,16 +231,87 @@ def _(mo):
     return
 
 
-app._unparsable_cell(
-    r"""
-    ### Variables
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    ### Variables 
 
     The first step, is to select the variables to analyze.
 
+    For the univariable analysis, we are going to use the variables:
 
-    """,
-    name="_"
-)
+    - target
+    - gender
+    """
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""First, we are going to see the distribution of these values:""")
+    return
+
+
+@app.cell
+def _(alt, clean_df):
+    target_bar_chart = alt.Chart(clean_df).mark_bar().encode(
+        x='target:N',  # N = Nominal (categorical)
+        y='count():Q',       # Q = Quantitative (count)
+        color=alt.Color('target:N', scale=alt.Scale(range=['#4E8BC4', '#68c89d'])),
+        tooltip=['target:N', 'count()']
+    ).properties(
+        title='Bots v Humans'
+    )
+
+    target_bar_chart
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""From here we can see that the list was created with an equal distribution of bots and users.""")
+    return
+
+
+@app.cell
+def _(alt, clean_df):
+    gen_pie_data = clean_df['gender'].value_counts()
+    gen_pie_data.columns = ['gender', 'count']
+
+    # Create the pie chart
+    gen_pie_chart = alt.Chart(gen_pie_data).mark_arc().encode(
+        theta='count:Q',
+        color=alt.Color('gender:N', scale=alt.Scale(range=['red', '#4E8BC4','#68c89d'])),
+        tooltip=['gender', 'count']
+    ).properties(
+        title='Gender Distribution'
+    )
+
+    (gen_pie_chart).configure_view(strokeWidth=0)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    According to the source documentation, the values for gender are:
+
+    - 0: Not specified
+    - 1: Female
+    - 2: Male
+
+    Based on this, we can notice that there are many more female users than male users, but it's worth noting that this is not removing the bot accounts from the total, and it the number of verified bots gainst the not specified are much more.
+    """
+    )
+    return
+
+
+@app.cell
+def _():
+    return
 
 
 @app.cell
@@ -277,16 +350,13 @@ def _(mo):
 
 
 @app.cell
-def _(matthews_corrcoef, mv_df, pd):
-    # Convert
-    pd_mv_df = mv_df.to_pandas()
-
+def _(matthews_corrcoef, pd, pd_clean_df):
     # Compute phi
     data = []
-    cols = pd_mv_df.columns
+    cols = pd_clean_df.columns
     for i in cols:
         for j in cols:
-            phi = matthews_corrcoef(pd_mv_df[i], pd_mv_df[j])
+            phi = matthews_corrcoef(pd_clean_df[i], pd_clean_df[j])
             data.append({"var1": i, "var2": j, "phi": phi})
 
     phi_df = pd.DataFrame(data)
@@ -348,16 +418,16 @@ def _(mo):
 
 
 @app.cell
-def _(mo, mv_df):
+def _(clean_df, mo):
     # UI Dropdown for feature selection
     feature_select_1 = mo.ui.dropdown(
-        options=mv_df.columns,
+        options=clean_df.columns,
         value="has_photo",
         label="Select Feature 1",
     )
 
     feature_select_2 = mo.ui.dropdown(
-        options=mv_df.columns,
+        options=clean_df.columns,
         value="target",
         label="Select Feature 2",
     )
@@ -373,8 +443,8 @@ def _(feature_select_1, feature_select_2):
 
 
 @app.cell
-def _(alt, mo, mv_df, selected_feature_1, selected_feature_2):
-    chart_data = mv_df.to_pandas()
+def _(alt, clean_df, mo, selected_feature_1, selected_feature_2):
+    chart_data = clean_df.to_pandas()
 
     mv_bar_plot_title_1 = selected_feature_1.replace("_", " ").capitalize()
     mv_bar_plot_title_2 = selected_feature_2.replace("_", " ").capitalize()
