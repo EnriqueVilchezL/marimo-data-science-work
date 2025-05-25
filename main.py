@@ -11,6 +11,13 @@ def _(mo):
 
 
 @app.cell
+def _():
+    import scipy.stats as stats
+
+    return
+
+
+@app.cell
 def _(mo):
     mo.md(
         """
@@ -555,13 +562,6 @@ async def _():
         import micropip
         await micropip.install("scikit-learn")
         await micropip.install("scipy")
-    return
-
-
-@app.cell
-def _():
-    import scipy.stats as stats
-
     return
 
 
