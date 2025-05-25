@@ -13,8 +13,8 @@ def _(mo):
 @app.cell
 def _():
     import scipy.stats as stats
-
-    return
+    from sklearn.metrics import matthews_corrcoef
+    return (matthews_corrcoef,)
 
 
 @app.cell
@@ -552,23 +552,6 @@ def _():
     import numpy as np
 
     return
-
-
-@app.cell
-async def _():
-    import sys
-
-    if sys.platform == "emscripten":
-        import micropip
-        await micropip.install("scikit-learn")
-        await micropip.install("scipy")
-    return
-
-
-@app.cell
-def _():
-    from sklearn.metrics import matthews_corrcoef
-    return (matthews_corrcoef,)
 
 
 @app.cell
