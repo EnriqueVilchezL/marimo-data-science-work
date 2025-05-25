@@ -16,14 +16,11 @@ def _(mo):
         """
     ##1. Dataset
 
-    This dataset contains profile data collected from VK.com (VKontakte), Russia's largest social network, for distinguishing between genuine users and automated bots. The data includes both numerical and categorical features extracted from user profiles.
+    To demonstrate the capabilities of Marimo and Altair, an exercise is proposed using a dataset containing information about users and bots from the Russian social network vk.com. This dataset can be found on [Kaggle](https://www.kaggle.com/datasets/juice0lover/users-vs-bots-classification).
 
-    Data Collection:
-    Collected from public VK.com profiles.
-    Includes both verified human users and verified bot accounts.
-    Represents realistic social network conditions with incomplete profiles.
+    The dataset is used as an exercise to determine whether a user is a bot or a real person. Nowadays, this is a growing challenge for companies, as the creation of bot farms is becoming more common. These bots are used to generate spam or, even worse, to carry out denial-of-service attacks. In addition to this focus, the dataset can also be used for other related analyses.
 
-    Source: https://www.kaggle.com/datasets/juice0lover/users-vs-bots-classification
+    The dataset contains a total of 5,874 entries and 60 columns or features. It is balanced with a 50-50 split between real user entries and bot entries. All accounts marked as real users were verified, as were all accounts marked as bots. The feature types vary and include numerical attributes, categorical attributes, binary attributes, and strings.   
     """
     )
     return
