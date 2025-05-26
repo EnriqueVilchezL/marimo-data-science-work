@@ -11,13 +11,6 @@ def _(mo):
 
 
 @app.cell
-def _():
-    import scipy.stats as stats
-    from sklearn.metrics import matthews_corrcoef
-    return (matthews_corrcoef,)
-
-
-@app.cell
 def _(mo):
     mo.md(
         """
@@ -61,6 +54,8 @@ def _(mo, pl):
         str(dataset_filepath),
         null_values=["Unknown"],
     )
+
+    mo.show_code()
     return (bot_dataset,)
 
 
@@ -73,22 +68,26 @@ def _(mo):
 @app.cell
 def _(bot_dataset, mo):
     schema = bot_dataset.schema
-
     schema_md = "\n".join([f"- **{name}**: {dtype}" for name, dtype in schema.items()])
-    mo.md(f"""
+
+    mo.show_code()
+    return (schema_md,)
+
+
+@app.cell
+def _(mo, schema_md):
+    mo.show_code(mo.md(f"""
     ### DataFrame Schema
-    {schema_md}""")
+    {schema_md}"""))
     return
 
 
 @app.cell
 def _(bot_dataset, mo):
-    df_describe = bot_dataset.describe()
-
-    mo.md(f"""
+    mo.show_code(mo.md(f"""
     ### Descriptive Statistics
-    {df_describe.to_pandas().to_markdown()}
-    """)
+    {bot_dataset.describe().to_pandas().to_markdown()}
+    """))
     return
 
 
@@ -104,19 +103,25 @@ def _(
     )
     target_selector = build_target_dropdown(bot_dataset)
     selected_columns = build_column_to_display_multiselect(bot_dataset)
-    mo.vstack(
+    mo.show_code()
+    return selected_columns, target_selector, title_target_selector
+
+
+@app.cell
+def _(mo, selected_columns, target_selector, title_target_selector):
+    mo.show_code(mo.vstack(
         [
             title_target_selector,
             selected_columns,
             target_selector,
         ]
-    )
-    return selected_columns, target_selector
+    ))
+    return
 
 
 @app.cell
-def _(display_filtered_data, selected_columns, target_selector):
-    display_filtered_data(target_selector, selected_columns)
+def _(display_filtered_data, mo, selected_columns, target_selector):
+    mo.show_code(display_filtered_data(target_selector, selected_columns))
     return
 
 
@@ -155,8 +160,10 @@ def _(mo):
 
 
 @app.cell
-def _(sql_with_marimo):
+def _(mo, sql_with_marimo):
     sql_with_marimo
+
+    mo.show_code()
     return
 
 
@@ -173,8 +180,8 @@ def _(mo):
 
 
 @app.cell
-def _(bot_dataset):
-    bot_dataset.describe()
+def _(bot_dataset, mo):
+    mo.show_code(bot_dataset.describe())
     return
 
 
@@ -187,12 +194,18 @@ def _(bot_dataset, mo, pl):
         > 0.25
     ]
 
-    mo.md(
+    mo.show_code()
+    return (non_useful_columns,)
+
+
+@app.cell
+def _(mo, non_useful_columns):
+    mo.show_code(mo.md(
         rf"""
     There is a lot of **null** values in the data. However, this is true to some columns, not all of them. As a result, we decided to eliminate the columns in which the amount of nulls is equal or greater than a quarter of the amount of rows. These are: {"\n\n- "}{"\n\n- ".join(non_useful_columns)}
     """
-    )
-    return (non_useful_columns,)
+    ))
+    return
 
 
 @app.cell
@@ -202,10 +215,18 @@ def _(mo):
 
 
 @app.cell
-def _(bot_dataset, non_useful_columns):
+def _(bot_dataset, mo, non_useful_columns):
     analysis_dataset = bot_dataset.drop(non_useful_columns)
-    analysis_dataset.describe()
+
+    mo.show_code()
     return (analysis_dataset,)
+
+
+@app.cell
+def _(analysis_dataset, mo):
+    mo.show_code(analysis_dataset.describe()
+    )
+    return
 
 
 @app.cell
@@ -215,12 +236,14 @@ def _(mo):
 
 
 @app.cell
-def _(analysis_dataset, pl):
+def _(analysis_dataset, mo, pl):
     clean_df = analysis_dataset.select(
         [pl.col(c).fill_null(pl.col(c).median()) for c in analysis_dataset.columns]
     )
     # Convert
     pd_clean_df = clean_df.to_pandas()
+
+    mo.show_code()
     return clean_df, pd_clean_df
 
 
@@ -260,7 +283,7 @@ def _(mo):
 
 
 @app.cell
-def _(alt, clean_df):
+def _(alt, clean_df, mo):
     alt.data_transformers.disable_max_rows()
     target_bar_chart = (
         alt.Chart(clean_df)
@@ -273,8 +296,13 @@ def _(alt, clean_df):
         )
         .properties(title="Bots v Humans")
     )
+    mo.show_code()
+    return (target_bar_chart,)
 
-    target_bar_chart
+
+@app.cell
+def _(mo, target_bar_chart):
+    mo.show_code(target_bar_chart)
     return
 
 
@@ -285,7 +313,7 @@ def _(mo):
 
 
 @app.cell
-def _(alt, clean_df):
+def _(alt, clean_df, mo):
     gen_pie_data = clean_df["gender"].value_counts()
     gen_pie_data.columns = ["gender", "count"]
 
@@ -303,7 +331,13 @@ def _(alt, clean_df):
         .properties(title="Gender Distribution")
     )
 
-    (gen_pie_chart).configure_view(strokeWidth=0)
+    mo.show_code()
+    return (gen_pie_chart,)
+
+
+@app.cell
+def _(gen_pie_chart, mo):
+    mo.show_code((gen_pie_chart).configure_view(strokeWidth=0))
     return
 
 
@@ -320,11 +354,6 @@ def _(mo):
     Based on this, we can notice that there are many more female users than male users, but it's worth noting that this is not removing the bot accounts from the total, and it the number of verified bots gainst the not specified are much more.
     """
     )
-    return
-
-
-@app.cell
-def _():
     return
 
 
@@ -364,7 +393,7 @@ def _(mo):
 
 
 @app.cell
-def _(matthews_corrcoef, pd, pd_clean_df, warnings):
+def _(matthews_corrcoef, mo, pd, pd_clean_df, warnings):
     warnings.filterwarnings("ignore")
     # Compute phi
     data = []
@@ -375,6 +404,8 @@ def _(matthews_corrcoef, pd, pd_clean_df, warnings):
             data.append({"var1": i, "var2": j, "phi": phi})
 
     phi_df = pd.DataFrame(data)
+
+    mo.show_code()
     return (phi_df,)
 
 
@@ -403,10 +434,15 @@ def _(alt, mo, phi_df):
             ),
         )
     )
+    mo.show_code()
+    return heatmap, text
 
-    mo.ui.altair_chart(
+
+@app.cell
+def _(heatmap, mo, text):
+    mo.show_code(mo.ui.altair_chart(
         (heatmap + text).configure_axis(labelFontSize=10, titleFontSize=12)
-    )
+    ))
     return
 
 
@@ -450,14 +486,18 @@ def _(clean_df, mo):
         value="target",
         label="Select Feature 2",
     )
+
+    mo.show_code()
     return feature_select_1, feature_select_2
 
 
 @app.cell
-def _(feature_select_1, feature_select_2):
+def _(feature_select_1, feature_select_2, mo):
     # Reactive components
     selected_feature_1 = feature_select_1.value
     selected_feature_2 = feature_select_2.value
+
+    mo.show_code()
     return selected_feature_1, selected_feature_2
 
 
@@ -483,20 +523,24 @@ def _(alt, clean_df, mo, selected_feature_1, selected_feature_2):
         )
         .properties(title=f"Count of {selected_feature_1} by {selected_feature_2}")
     )
+
+    mo.show_code()
     return (mv_bar_plot,)
 
 
 @app.cell
 def _(feature_select_1, feature_select_2, mo, mv_bar_plot):
     # Display all components
-    mo.vstack(
+    mo.show_code(mo.vstack(
         [
             feature_select_1,
             feature_select_2,
             mv_bar_plot,
             mo.ui.table(mv_bar_plot.value),
         ]
-    )
+    ))
+
+
     return
 
 
@@ -527,44 +571,65 @@ def _(mo):
 
 
 @app.cell
-def _():
+def _(mo):
     import warnings
-
+    mo.show_code()
     return (warnings,)
 
 
 @app.cell
-def _():
-    import polars as pl
-
-    return (pl,)
-
-
-@app.cell
-def _():
-    import pandas as pd
-
-    return (pd,)
-
-
-@app.cell
-def _():
-    import numpy as np
-
+def _(mo):
+    import scipy.stats as stats
+    mo.show_code()
     return
 
 
 @app.cell
-def _():
-    import altair as alt
+def _(mo):
+    from sklearn.metrics import matthews_corrcoef
+    mo.show_code()
+    return (matthews_corrcoef,)
 
+
+@app.cell
+def _(mo):
+    import tabulate
+    mo.show_code()
+    return
+
+
+@app.cell
+def _(mo):
+    import polars as pl
+    mo.show_code()
+    return (pl,)
+
+
+@app.cell
+def _(mo):
+    import pandas as pd
+    mo.show_code()
+    return (pd,)
+
+
+@app.cell
+def _(mo):
+    import numpy as np
+    mo.show_code()
+    return
+
+
+@app.cell
+def _(mo):
+    import altair as alt
+    mo.show_code()
     return (alt,)
 
 
 @app.cell
 def _():
     import marimo as mo
-
+    mo.show_code()
     return (mo,)
 
 
@@ -590,7 +655,7 @@ def _(mo, pl):
             value="Show All",  # Default value
             label="🎯 Filter by Target Value:",
         )
-
+    mo.show_code()
     return (build_target_dropdown,)
 
 
@@ -604,7 +669,7 @@ def _(mo, pl):
             options=bot_dataset_options,
             label="Select the columns that you want to see!",
         )
-
+    mo.show_code()
     return (build_column_to_display_multiselect,)
 
 
@@ -652,7 +717,7 @@ def _(bot_dataset, mo, pl):
                 data_to_display.select(columns_to_display),
             ]
         )
-
+    mo.show_code()
     return (display_filtered_data,)
 
 
